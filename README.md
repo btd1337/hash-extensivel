@@ -10,8 +10,8 @@
 - Execute os comandos:
 
 ```sh
-javac -d . src/ds2/**/*.java
-jar cvmf META-INF/MANIFEST.MF ed2.jar ds2
+javac -d . src/**/*.java
+jar cvmf META-INF/MANIFEST.MF ed2.jar ed2
 ```
 
 > Caso apareça a mensagem abaixo apenas ignore

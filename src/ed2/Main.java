@@ -28,11 +28,14 @@ public class Main {
 			return;
 		}
 
-		Diretorio diretorio = new Diretorio(numElementos, Diretorio.extrairPseudoChaveDeChaveInteira);
+
+		Diretorio diretorio = new Diretorio(tamanhoBaldes, Diretorio.extrairPseudoChaveDeChaveInteira);
 		elementos = Utils.gerarElementosAleatorios(numElementos, numBitsPseudoChaves, gerador);
 
 		for (Elemento elemento: elementos) {
 			diretorio.adiciona(elemento);
 		}
+
+		System.out.println(diretorio.obterEstatisticas());
 	}
 }

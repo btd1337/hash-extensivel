@@ -1,6 +1,7 @@
 package ed2;
 
 import java.util.ArrayList;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Diretorio {
@@ -9,7 +10,13 @@ public class Diretorio {
 	private int profundidadeGlobal;
 	private Function<Integer,String> hash;
 	private int tamanhoBaldes;
-	static Function<Integer,String> extrairPseudoChaveDeChaveInteira = (chave) -> Integer.toBinaryString(chave);
+	private int numElementos;
+
+	private int duplicacoesPorBaldeCheio = 0;
+	private int duplicacoesPorFatorDeCarga = 0;
+
+	static Function<Integer, String> extrairPseudoChaveDeChaveInteira = (chave) ->  Integer.toBinaryString(chave) ;
+
 
 	/**
 	 * Cria diretório começando com 2 pastas
@@ -18,6 +25,7 @@ public class Diretorio {
 	 */
 	Diretorio(int tamanhoBaldes, Function<Integer,String> hash) {
 		this.profundidadeGlobal = 1;
+		this.numElementos = 0;
 		this.tamanhoBaldes = tamanhoBaldes;
 		this.hash = hash;
 		pastas = new ArrayList<>(Constantes.NUM_MINIMO_PASTAS);
@@ -37,20 +45,13 @@ public class Diretorio {
 	 */
 	Diretorio(int tamanhoBaldes, Function<Integer,String> hash, int profundidadeGlobal) {
 		this.profundidadeGlobal = profundidadeGlobal;
+		this.numElementos = 0;
 		this.hash = hash;
 		int numPastas = (int) Math.pow(2, profundidadeGlobal);
 		pastas = new ArrayList<Balde>(numPastas);
 		pastasAux = new ArrayList<>(Constantes.NUM_MINIMO_PASTAS);
 
 		this.inicializaApontamentodePastasParaBalde(numPastas, Constantes.PROFUNDIDADE_INICIAL_BALDE);
-	}
-
-	public ArrayList<Balde> getPastas() {
-		return pastas;
-	}
-
-	public int getProfundidadeGlobal() {
-		return profundidadeGlobal;
 	}
 
 	private void inicializaApontamentodePastasParaBalde(int numPastas, int profundidadeBalde) {
@@ -70,13 +71,19 @@ public class Diretorio {
 		String pseudoChave = this.hash.apply(elemento.getChave());
 		int indiceBalde = this.determinaIndice(pseudoChave);
 
-		if (this.pastas.get(indiceBalde).getElementos().size() == this.tamanhoBaldes) {
+		// Se encher o balde ou extrapolar o fator de carga então duplicar diretorios
+		boolean isBaldeCheio = this.pastas.get(indiceBalde).getElementos().size() == this.tamanhoBaldes ? true : false;
+		boolean iraExcederFatorDeCarga = this.iraExcederFatorDeCarga();
+
+		if ( isBaldeCheio || iraExcederFatorDeCarga) {
 			this.duplicaDiretorio();
+			this.incrementaEstatisticaDuplicacaoDiretorio(isBaldeCheio, iraExcederFatorDeCarga);
 			// recalcula novo indice
 			indiceBalde = this.determinaIndice(pseudoChave);
 		}
 
 		this.pastas.get(indiceBalde).adiciona(elemento);
+		this.numElementos++;
 	}
 
 	/**
@@ -86,6 +93,12 @@ public class Diretorio {
 	 * estar em binário e converte ela para base decimal
 	 */
 	public int determinaIndice(String pseudoChave) {
+
+		if (pseudoChave.length() < profundidadeGlobal) {
+			pseudoChave = Utils.adicionaNCaracteresNoInicioDeString(
+					pseudoChave, "0", profundidadeGlobal - pseudoChave.length()
+			);
+		}
 		return Integer.parseInt(pseudoChave.substring(0, profundidadeGlobal), 2);
 	}
 
@@ -140,6 +153,44 @@ public class Diretorio {
 				this.pastas.get(i).getElementos().addAll(this.pastasAux.get(i).getElementos());
 				this.pastasAux.get(i).getElementos().clear();
 			}
+		}
+	}
+
+	private boolean iraExcederFatorDeCarga() {
+		double fatorDeCargaPosInsercao  = (this.numElementos + 1) / this.pastas.size();
+		return fatorDeCargaPosInsercao > Constantes.FATOR_DE_CARGA_PADRAO ? true : false;
+	}
+
+	private void incrementaEstatisticaDuplicacaoDiretorio(boolean isBaldeCheio, boolean iraExcederFatorDeCarga) {
+		if (isBaldeCheio) {
+			this.duplicacoesPorBaldeCheio++;
+		}
+
+		if (iraExcederFatorDeCarga) {
+			this.duplicacoesPorFatorDeCarga++;
+		}
+	}
+
+	public String obterEstatisticas() {
+		return String.format(
+				"Número de Pastas: %d | Número de Elementos: %d | Número de Duplicação por balde cheio: %d | Número de Duplicação por fator de carga: %d",
+				this.pastas.size(), this.numElementos, this.duplicacoesPorBaldeCheio, this.duplicacoesPorFatorDeCarga
+		);
+	}
+
+	public void printaDiretorio() {
+		String binarioString;
+		System.out.println("Profundidade: " + this.profundidadeGlobal);
+		for (int i=0; i < this.pastas.size(); i++) {
+			binarioString = Utils.converteInteiroParaBinarioString(i, this.profundidadeGlobal);
+			System.out.printf("Diretório " + i + "(" + binarioString + ") => ");
+			for (Elemento elemento:
+			     this.pastas.get(i).getElementos()) {
+
+				binarioString = Utils.converteInteiroParaBinarioString(elemento.getChave(), this.profundidadeGlobal);
+				System.out.printf(binarioString + " ");
+			}
+			System.out.printf("\n");
 		}
 	}
 }
