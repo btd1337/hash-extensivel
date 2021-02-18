@@ -1,3 +1,5 @@
+package ed2;
+
 import java.util.ArrayList;
 import java.util.function.Function;
 
@@ -19,6 +21,7 @@ public class Diretorio {
 		this.tamanhoBaldes = tamanhoBaldes;
 		this.hash = hash;
 		pastas = new ArrayList<>(Constantes.NUM_MINIMO_PASTAS);
+		pastasAux = new ArrayList<>(Constantes.NUM_MINIMO_PASTAS);
 
 		for (int i = 0; i < Math.pow(2, profundidadeGlobal); i++) {
 			this.pastas.add(new Balde(this.profundidadeGlobal, this.tamanhoBaldes, this.hash));
@@ -37,6 +40,7 @@ public class Diretorio {
 		this.hash = hash;
 		int numPastas = (int) Math.pow(2, profundidadeGlobal);
 		pastas = new ArrayList<Balde>(numPastas);
+		pastasAux = new ArrayList<>(Constantes.NUM_MINIMO_PASTAS);
 
 		this.inicializaApontamentodePastasParaBalde(numPastas, Constantes.PROFUNDIDADE_INICIAL_BALDE);
 	}

@@ -1,3 +1,5 @@
+package ed2;
+
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Random;
@@ -26,10 +28,11 @@ public class Main {
 			return;
 		}
 
+		Diretorio diretorio = new Diretorio(numElementos, Diretorio.extrairPseudoChaveDeChaveInteira);
 		elementos = Utils.gerarElementosAleatorios(numElementos, numBitsPseudoChaves, gerador);
 
 		for (Elemento elemento: elementos) {
-			System.out.println(elemento.getChave());
+			diretorio.adiciona(elemento);
 		}
 	}
 }

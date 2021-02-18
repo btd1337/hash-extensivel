@@ -1,3 +1,5 @@
+package ed2;
+
 public class Elemento {
 	private int chave;
 

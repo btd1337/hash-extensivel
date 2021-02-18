@@ -1,3 +1,5 @@
+package ed2;
+
 public class Constantes {
 	static int PROFUNDIDADE_INICIAL_BALDE = 0;
 
